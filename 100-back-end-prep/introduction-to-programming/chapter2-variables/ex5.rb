@@ -1,0 +1,2 @@
+# The first program should output x with a value of 3
+# The second program should produce an error when trying to output x because it's not part of the main scope, but instead belongs to the do end scope.
