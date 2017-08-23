@@ -6,6 +6,7 @@
 # answer = Kernel.gets()
 # Kernel.puts(answer)
 require "pry"
+
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
