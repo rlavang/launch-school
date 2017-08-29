@@ -57,7 +57,7 @@ prompt("Welcome to Rock Paper Scissors Lizard Spock.")
 prompt("The game ends for whoever gets to 5 points first.")
 
 loop do
-  score_card = { player: 0, computer: 0 }
+  score = { player: 0, computer: 0 }
   loop do
     user_choice = ''
     loop do
@@ -78,14 +78,14 @@ loop do
 
     winner = winner(user_choice, computer_choice)
 
-    update_score(score_card, winner)
+    update_score(score, winner)
 
-    display_results(score_card, winner)
+    display_results(score, winner)
 
-    break if game_over?(score_card)
+    break if game_over?(score)
   end
 
-  display_final_results(score_card)
+  display_final_results(score)
 
   answer = ''
   prompt("Do you want to play again? y for yes, n for no.")
