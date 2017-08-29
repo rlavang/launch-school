@@ -1,3 +1,4 @@
+require 'yaml'
 VALID_CHOICES = %w(rock paper scissors)
 
 def prompt(message)

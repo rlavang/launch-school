@@ -5,6 +5,7 @@
 
 # answer = Kernel.gets()
 # Kernel.puts(answer)
+require "yaml"
 require "pry"
 
 def prompt(message)
