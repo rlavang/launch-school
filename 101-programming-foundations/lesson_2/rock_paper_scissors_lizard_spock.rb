@@ -14,7 +14,11 @@ def prompt(message)
   Kernel.puts("=> #{message}")
 end
 
-def winner(player, computer)
+def clear_screen
+  system('clear') || system('cls')
+end
+
+def determine_winner(player, computer)
   if WIN_CONDITIONS[player].include?(computer)
     :player
   elsif WIN_CONDITIONS[computer].include?(player)
@@ -48,11 +52,12 @@ end
 def display_final_results(score)
   if score[:player] >= 5
     prompt("You have one the game! Congratulations!")
-  elsif score[:computer]
+  elsif score[:computer] >= 5
     prompt("You have lost the game to the computer! Maybe next time!")
   end
 end
 
+clear_screen()
 prompt("Welcome to Rock Paper Scissors Lizard Spock.")
 prompt("The game ends for whoever gets to 5 points first.")
 
@@ -73,16 +78,14 @@ loop do
     end
 
     computer_choice = VALID_CHOICES.values.sample
-
     prompt("You chose #{user_choice}; Computer chose: #{computer_choice}")
-
-    winner = winner(user_choice, computer_choice)
-
+    winner = determine_winner(user_choice, computer_choice)
     update_score(score, winner)
-
     display_results(score, winner)
-
+    prompt("Starting next round...")
+    sleep(3)
     break if game_over?(score)
+    clear_screen()
   end
 
   display_final_results(score)
@@ -97,7 +100,5 @@ loop do
   end
 
   break if answer == 'n'
-
-  system("cls") || system("clear")
 end
 prompt("Thank you for playing. Good bye!")
