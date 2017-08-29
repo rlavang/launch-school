@@ -1,4 +1,3 @@
-
 VALID_CHOICES = { 'r' => 'rock',
                   's' => 'scissors',
                   'p' => 'paper',
@@ -54,15 +53,18 @@ def display_final_results(score)
   end
 end
 
+prompt("Welcome to Rock Paper Scissors Lizard Spock.")
+prompt("The game ends for whoever gets to 5 points first.")
+
 loop do
   score_card = { player: 0, computer: 0 }
   loop do
     user_choice = ''
     loop do
       prompt("Choose one: r for Rock, p for Paper, s for Scissor,
-             sp for Spock, and l for Lizard")
-      user_choice = Kernel.gets().chomp()
-      if VALID_CHOICES.key?(user_choice.downcase)
+               sp for Spock, and l for Lizard")
+      user_choice = Kernel.gets().chomp().downcase
+      if VALID_CHOICES.key?(user_choice)
         user_choice = VALID_CHOICES[user_choice]
         break
       else
@@ -85,8 +87,17 @@ loop do
 
   display_final_results(score_card)
 
-  prompt("Do you want to play again?")
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?('y')
+  answer = ''
+  prompt("Do you want to play again? y for yes, n for no.")
+
+  loop do
+    answer = Kernel.gets().chomp().downcase()
+    break if answer == 'y' || answer == 'n'
+    prompt("Please input y for yes, or n for no.")
+  end
+
+  break if answer == 'n'
+
+  system("cls") || system("clear")
 end
 prompt("Thank you for playing. Good bye!")
