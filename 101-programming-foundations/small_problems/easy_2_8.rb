@@ -9,6 +9,11 @@ end
 puts "Please enter an integer greater than 0:"
 num = gets.chomp.to_i
 
+while num <= 0
+  puts "Please enter an integer greater than 0:"
+  num = gets.chomp.to_i
+end
+
 loop do
   puts "Enter 's' to compute the sum, 'p', to compute the product."
   decision = gets.chomp
