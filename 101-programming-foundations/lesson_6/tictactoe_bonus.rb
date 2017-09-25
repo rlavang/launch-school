@@ -115,10 +115,6 @@ def detect_winner(brd)
   nil
 end
 
-def current_player(player)
-  player == 'c' ? 'c' : 'p'
-end
-
 def alternate_player(player)
   player == 'c' ? 'p' : 'c'
 end
@@ -139,13 +135,13 @@ end
 
 def end_game?(input)
   loop do
-    if input.downcase == 'y'
+    if input == 'y'
       return false
-    elsif input.downcase == 'n'
+    elsif input == 'n'
       return true
     else
       prompt("Please input y to play again or n to stop.")
-      input = gets.chomp
+      input = gets.chomp.downcase
     end
   end
 end
@@ -155,7 +151,7 @@ def choose_starter
   if STARTER == 'choose'
     loop do
       prompt "Who plays first? Type c for computer or p for player."
-      current_player = gets.chomp
+      current_player = gets.chomp.downcase
       break if current_player == 'c' || current_player == 'p'
       prompt "Invalid input. Please type c for computer or p for player."
     end
@@ -170,6 +166,7 @@ end
 loop do # Initialize Game
   score = { player: 0, computer: 0 }
   prompt "WELCOME TO TIC TAC TOE!"
+  prompt "First to 5 rounds of victory, wins!"
   loop do # Start Round
     board = initialize_board
     current_player = choose_starter
@@ -194,7 +191,7 @@ loop do # Initialize Game
     break if score[:player] >= 5 || score[:computer] >= 5
   end
   prompt "Play again? (y or n)"
-  answer = gets.chomp
+  answer = gets.chomp.downcase
   break if end_game?(answer)
 end
 prompt "Thanks for playing Tic Tac Toe! Good Bye!"
