@@ -1,4 +1,3 @@
-require 'pry'
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                 [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
                 [[1, 5, 9], [3, 5, 7]] # diagonals
@@ -30,8 +29,8 @@ def display_board(brd)
   puts "     |     |"
   puts ""
 end
-
 # rubocop:enable Metrics/AbcSize
+
 def joinor(empty_squares, delimiter = '', last_delimit = 'or')
   case empty_squares.size
   when 0 then ''
@@ -66,15 +65,27 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece!(brd)
-  square = computer_optimal_play(brd)
-  if square
-    brd[square] = COMPUTER_MARKER
-  elsif empty_squares(brd).include?(5)
-    brd[5] = COMPUTER_MARKER
-  else
-    square = empty_squares(brd).sample
-    brd[square] = COMPUTER_MARKER
+  square = nil
+
+  WINNING_LINES.each do |line|
+    square = computer_optimal_play(line, brd, PLAYER_MARKER)
+    break if square
   end
+
+  if !square
+    WINNING_LINES.each do |line|
+      square = computer_optimal_play(line, brd, COMPUTER_MARKER)
+      break if square
+    end
+  end
+
+  if !square && brd[5] == INITIAL_MARKER
+    square = 5
+  end
+
+  square = empty_squares(brd).sample if !square
+
+  brd[square] = COMPUTER_MARKER
 end
 
 def board_full?(brd)
@@ -86,8 +97,8 @@ def someone_won?(brd)
 end
 
 def increment_score(score, brd)
-  score[:player] +=1 if detect_winner(brd) == 'Player'
-  score[:computer] +=1 if detect_winner(brd) == 'Computer'
+  score[:player] += 1 if detect_winner(brd) == 'Player'
+  score[:computer] += 1 if detect_winner(brd) == 'Computer'
   score
 end
 
@@ -118,19 +129,10 @@ def place_piece(board, current_player)
   end
 end
 
-def computer_optimal_play(brd)
-  offensive_square = nil
-  defensive_square = nil
-  WINNING_LINES.each do |line|
-    if brd.values_at(*line).count(COMPUTER_MARKER) == 2 && brd.values_at(*line).count(PLAYER_MARKER) == 0
-      offensive_square = brd.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
-    elsif brd.values_at(*line).count(PLAYER_MARKER) == 2 && brd.values_at(*line).count(COMPUTER_MARKER) == 0
-      defensive_square = brd.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
-    end
+def computer_optimal_play(line, board, marker)
+  if board.values_at(*line).count(marker) == 2
+    board.select { |k, v| line.include?(k) && v == INITIAL_MARKER }.keys.first
   end
-  return offensive_square if offensive_square  
-  return defensive_square if defensive_square
-  nil
 end
 
 def end_game?(input)
@@ -149,10 +151,10 @@ end
 def choose_starter
   current_player = nil
   if STARTER == 'choose'
-    loop do 
+    loop do
       prompt "Who plays first? Type c for computer or p for player."
       current_player = gets.chomp
-      break if current_player == 'c' or current_player == 'p'
+      break if current_player == 'c' || current_player == 'p'
       prompt "Invalid input. Please type c for computer or p for player."
     end
   elsif STARTER == 'p'
@@ -164,8 +166,8 @@ def choose_starter
 end
 
 loop do # Initialize Game
-  score = {player => 0, computer => 0}
-  loop do # Start Round 
+  score = { :player => 0, :computer => 0 }
+  loop do # Start Round
     board = initialize_board
     current_player = choose_starter
     loop do # Play Turn
@@ -184,11 +186,11 @@ loop do # Initialize Game
       prompt "It's a tie!"
     end
 
-    prompt "Current score is Player: #{score[:player]} Computer: #{score[:computer]}"
+    prompt "SCORE - Player: #{score[:player]} Computer: #{score[:computer]}"
     break if score[:player] >= 5 || score[:computer] >= 5
   end
-    prompt "Play again? (y or n)"
-    answer = gets.chomp
-    break if end_game?(answer)
+  prompt "Play again? (y or n)"
+  answer = gets.chomp
+  break if end_game?(answer)
 end
 prompt "Thanks for playing Tic Tac Toe! Good Bye!"
