@@ -15,7 +15,7 @@ end
 # rubocop:disable Metrics/AbcSize
 def display_board(brd)
   system 'clear'
-  puts "You're a #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}"
+  puts "You're #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}"
   puts ""
   puts "     |     |"
   puts "  #{brd[1]}  |  #{brd[2]}  |  #{brd[3]}"
@@ -30,20 +30,17 @@ def display_board(brd)
   puts "     |     |"
   puts ""
 end
-# rubocop:enable Metrics/AbcSize
 
+# rubocop:enable Metrics/AbcSize
 def joinor(empty_squares, delimiter = '', last_delimit = 'or')
-  choices = ''
-  empty_squares.each_with_index do |value, index|
-    if empty_squares.length == 1
-      choices << "#{value}"
-    elsif index == empty_squares.length - 1
-      choices << "#{last_delimit} #{value}"
-    else
-      choices << "#{value}#{delimiter}"
-    end
+  case empty_squares.size
+  when 0 then ''
+  when 1 then empty_squares.first
+  when 2 then empty_squares.join(" #{last_delimit} ")
+  else
+    empty_squares[-1] = "#{last_delimit} #{empty_squares.last}"
+    empty_squares.join(delimiter)
   end
-  choices
 end
 
 def initialize_board
@@ -54,10 +51,6 @@ end
 
 def empty_squares(brd)
   brd.keys.select { |num| brd[num] == INITIAL_MARKER }
-end
-
-def played_filled_squares(brd)
-  brd.keys.select{|num| brd[num] == PLAYER_MARKER}
 end
 
 def player_places_piece!(brd)
@@ -135,19 +128,46 @@ def computer_optimal_play(brd)
       defensive_square = brd.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
     end
   end
-  binding.pry
   return offensive_square if offensive_square  
   return defensive_square if defensive_square
   nil
 end
 
+def end_game?(input)
+  loop do
+    if input.downcase == 'y'
+      return true
+    elsif input.downcase == 'n'
+      return false
+    else
+      prompt("Please input y to play again or n to stop.")
+      gets.chomp
+    end
+  end
+end
+
+def choose_starter
+  current_player = nil
+  if STARTER == 'choose'
+    loop do 
+      prompt "Who plays first? Type c for computer or p for player."
+      current_player = gets.chomp
+      break if current_player == 'c' or current_player == 'p'
+      prompt "Invalid input. Please type c for computer or p for player."
+    end
+  elsif STARTER == 'p'
+    current_player = 'p'
+  else
+    current_player = 'c'
+  end
+  current_player
+end
+
 loop do # Initialize Game
-  score = {:player => 0, :computer => 0}
+  score = {player => 0, computer => 0}
   loop do # Start Round 
     board = initialize_board
-    prompt ("Who plays first? Type c for computer or p for player")
-    current_player = gets.chomp
-
+    current_player = choose_starter
     loop do # Play Turn
       display_board(board)
       place_piece(board, current_player)
@@ -169,7 +189,6 @@ loop do # Initialize Game
   end
     prompt "Play again? (y or n)"
     answer = gets.chomp
-    break unless answer.downcase.start_with?('y')
+    break if end_game?(answer)
 end
-
-puts "Thanks for playing Tic Tac Toe! Good Bye!"
+prompt "Thanks for playing Tic Tac Toe! Good Bye!"
