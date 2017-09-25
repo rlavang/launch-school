@@ -13,7 +13,7 @@ end
 
 # rubocop:disable Metrics/AbcSize
 def display_board(brd)
-  system 'clear'
+  clear_screen
   puts "You're #{PLAYER_MARKER}. Computer is #{COMPUTER_MARKER}"
   puts ""
   puts "     |     |"
@@ -42,6 +42,10 @@ def joinor(empty_squares, delimiter = '', last_delimit = 'or')
   end
 end
 
+def clear_screen
+  (system "clear") || (system 'cls')
+end
+
 def initialize_board
   new_board = {}
   (1..9).each { |num| new_board[num] = INITIAL_MARKER }
@@ -60,31 +64,29 @@ def player_places_piece!(brd)
     square = gets.chomp.to_i
     break if empty_squares(brd).include?(square)
     prompt "Sorry, that's not a valid choice."
+    sleep 0.5
+    display_board(brd)
   end
   brd[square] = PLAYER_MARKER
 end
 
 def computer_places_piece!(brd)
   square = nil
+  WINNING_LINES.each do |line|
+    square = computer_optimal_play(line, brd, COMPUTER_MARKER)
+    return (brd[square] = COMPUTER_MARKER) if square
+  end
 
   WINNING_LINES.each do |line|
     square = computer_optimal_play(line, brd, PLAYER_MARKER)
-    break if square
-  end
-
-  if !square
-    WINNING_LINES.each do |line|
-      square = computer_optimal_play(line, brd, COMPUTER_MARKER)
-      break if square
-    end
+    return (brd[square] = COMPUTER_MARKER) if square
   end
 
   if !square && brd[5] == INITIAL_MARKER
-    square = 5
+    return (brd[5] = COMPUTER_MARKER)
   end
 
   square = empty_squares(brd).sample if !square
-
   brd[square] = COMPUTER_MARKER
 end
 
@@ -138,12 +140,12 @@ end
 def end_game?(input)
   loop do
     if input.downcase == 'y'
-      return true
-    elsif input.downcase == 'n'
       return false
+    elsif input.downcase == 'n'
+      return true
     else
       prompt("Please input y to play again or n to stop.")
-      gets.chomp
+      input = gets.chomp
     end
   end
 end
@@ -166,15 +168,17 @@ def choose_starter
 end
 
 loop do # Initialize Game
-  score = { :player => 0, :computer => 0 }
+  score = { player: 0, computer: 0 }
+  prompt "WELCOME TO TIC TAC TOE!"
   loop do # Start Round
     board = initialize_board
     current_player = choose_starter
+    display_board(board)
     loop do # Play Turn
-      display_board(board)
       place_piece(board, current_player)
       break if someone_won?(board) || board_full?(board)
       current_player = alternate_player(current_player)
+      display_board(board)
     end
 
     display_board(board)
