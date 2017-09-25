@@ -1,10 +1,12 @@
+require 'pry'
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                 [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # cols
                 [[1, 5, 9], [3, 5, 7]] # diagonals
 
-INTIAL_MARKER = ' '
+INITIAL_MARKER = ' '
 PLAYER_MARKER = 'X'
 COMPUTER_MARKER = 'O'
+STARTER = 'choose'
 
 def prompt(msg)
   puts "=> #{msg}"
@@ -44,14 +46,18 @@ def joinor(empty_squares, delimiter = '', last_delimit = 'or')
   choices
 end
 
-def intialize_board
+def initialize_board
   new_board = {}
-  (1..9).each { |num| new_board[num] = INTIAL_MARKER }
+  (1..9).each { |num| new_board[num] = INITIAL_MARKER }
   new_board
 end
 
 def empty_squares(brd)
-  brd.keys.select { |num| brd[num] == INTIAL_MARKER }
+  brd.keys.select { |num| brd[num] == INITIAL_MARKER }
+end
+
+def played_filled_squares(brd)
+  brd.keys.select{|num| brd[num] == PLAYER_MARKER}
 end
 
 def player_places_piece!(brd)
@@ -67,8 +73,15 @@ def player_places_piece!(brd)
 end
 
 def computer_places_piece!(brd)
-  square = empty_squares(brd).sample
-  brd[square] = COMPUTER_MARKER
+  square = computer_optimal_play(brd)
+  if square
+    brd[square] = COMPUTER_MARKER
+  elsif empty_squares(brd).include?(5)
+    brd[5] = COMPUTER_MARKER
+  else
+    square = empty_squares(brd).sample
+    brd[square] = COMPUTER_MARKER
+  end
 end
 
 def board_full?(brd)
@@ -96,19 +109,50 @@ def detect_winner(brd)
   nil
 end
 
+def current_player(player)
+  player == 'c' ? 'c' : 'p'
+end
+
+def alternate_player(player)
+  player == 'c' ? 'p' : 'c'
+end
+
+def place_piece(board, current_player)
+  if current_player == 'c'
+    computer_places_piece!(board)
+  else
+    player_places_piece!(board)
+  end
+end
+
+def computer_optimal_play(brd)
+  offensive_square = nil
+  defensive_square = nil
+  WINNING_LINES.each do |line|
+    if brd.values_at(*line).count(COMPUTER_MARKER) == 2 && brd.values_at(*line).count(PLAYER_MARKER) == 0
+      offensive_square = brd.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
+    elsif brd.values_at(*line).count(PLAYER_MARKER) == 2 && brd.values_at(*line).count(COMPUTER_MARKER) == 0
+      defensive_square = brd.select{|k,v| line.include?(k) && v == INITIAL_MARKER}.keys.first
+    end
+  end
+  binding.pry
+  return offensive_square if offensive_square  
+  return defensive_square if defensive_square
+  nil
+end
+
 loop do # Initialize Game
   score = {:player => 0, :computer => 0}
-  loop do # Play Round 
-    board = intialize_board
+  loop do # Start Round 
+    board = initialize_board
+    prompt ("Who plays first? Type c for computer or p for player")
+    current_player = gets.chomp
 
     loop do # Play Turn
       display_board(board)
-
-      player_places_piece!(board)
+      place_piece(board, current_player)
       break if someone_won?(board) || board_full?(board)
-
-      computer_places_piece!(board)
-      break if someone_won?(board) || board_full?(board)
+      current_player = alternate_player(current_player)
     end
 
     display_board(board)
