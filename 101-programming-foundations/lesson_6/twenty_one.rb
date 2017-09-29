@@ -42,6 +42,19 @@ def total(cards)
   total_value
 end
 
+loop do
+  puts "Hit or stay?"
+  answer = gets.chomp
+  break if answer == 'stay' || busted?
+
+end
+
+if busted?
+  #end tje gam,e
+else
+  puts "You chose to stay"
+end
+
 p total([['H', '2'], ['S', 'J'], ['D', 'A']])
 p total([['H', 'Q'], ['S', 'J'], ['D', 'A']])
 p total([['H', 'A'], ['S', 'J'], ['D', 'A']])
