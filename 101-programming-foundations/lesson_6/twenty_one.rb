@@ -13,6 +13,14 @@ deck = [['S', '1'], ['H', '1'], ['C', '1'],['D', '1'],
         ['S', 'K'], ['H', 'K'], ['C', 'K'],['D', 'K'],
         ['S', 'A'], ['H', 'A'], ['C', 'A'],['D', 'A']]
 
+def clear_screen
+  (system "clear") || (system 'cls')
+end
+
+def prompt(msg)
+  puts "=> #{msg}"
+end
+
 def initalize_hand(deck)
   hand = deck.sample(2)
   deck.delete(hand[0])
@@ -22,6 +30,40 @@ end
 
 def hit(deck, hand)
   hand << deck.sample
+end
+
+def detect_result(dealer_hand, player_hand)
+  player_total = total(player_hand)
+  dealer_total = total(dealer_hand)
+
+  if player_total > 21
+    :player_busted
+  elsif dealer_total > 21
+    :dealer_busted
+  elsif dealer_total < player_total
+    :player
+  elsif player_total < dealer_total
+    :dealer
+  else
+    :tie
+  end
+end
+
+def display_result(dealer_hand, player_hand)
+  result = detect_result(dealer_hand, player_hand)
+
+  case result
+  when :player_busted
+    prompt "You busted! Dealer wins!"
+  when :dealer_busted
+    prompt "Dealer busted! You win!"
+  when :player
+    prompt "You win!"
+  when :dealer
+    prompt "Dealer wins!"
+  else
+    prompt "It's a tie! Try your luck next time!"
+	end
 end
 
 def total(cards)
@@ -39,7 +81,7 @@ def total(cards)
     end
   end
 
-#Select only aces to adjust for highest value
+  #Select only aces to adjust for highest value
   card_values.select {|value| value == 'A'}.count.times do
     total_value -=10 if total_value > 21
   end
@@ -48,52 +90,74 @@ def total(cards)
 end
 
 def busted?(hand)
-  if total(hand) > 21
-    return true
-  end
+  return true if total(hand) > 21
   false
 end
 
+def play_again?
+  loop do
+    prompt ("Would you like to play again? y or n")
+    answer = gets.chomp.downcase
+    if answer == 'y'
+      return true
+    elsif answer == 'n'
+      return false
+    else
+      prompt ("Invalid response. Please put 'y' for yes or 'n' for no.")
+    end
+	end
+	system_clear
+end
+
 #Intialize Game
-player_hand = initalize_hand(deck)
-puts "Your hand is #{player_hand}"
-
-#Players Turn
 loop do
-  puts "Hit or stay?"
-  answer = gets.chomp
-  hit(deck, player_hand)   
-  puts "Your hand is #{player_hand}"
-  puts "Total value of your hand is #{total(player_hand)}"
-  break if answer == 'stay' || busted?(player_hand)
-end
+	clear_screen
+	prompt "Welcome to Twenty-One!"
+	prompt "Dealing player hand..."
 
-if busted?(player_hand)
-  puts "You lost. Try your luck another time."
-  #end the game
-else
-  puts "You chose to stay"
-end
+	player_hand = initalize_hand(deck)
+	dealer_hand = initalize_hand(deck)
+	prompt "Your hand is #{player_hand}"
+	prompt "Total value of your hand is #{total(player_hand)}"
 
-#Dealer Turn
-dealer_hand = initalize_hand(deck)
-puts "Dealer hand is #{dealer_hand}"
-puts "Total value of hand is #{total(dealer_hand)}"
-loop do
-  if busted?(dealer_hand)
-     puts "Dealer busted. You win!"
-     break
-  elsif  total(dealer_hand) > total(player_hand) 
-    puts "Dealer wins!"
-    break
-  else
-    hit(deck, dealer_hand)
-    puts "Dealer hand is #{dealer_hand}"
-    puts "Dealer hand value is #{total(dealer_hand)}"
+  #Players Turn
+  loop do
+		prompt "Hit or stay?"
+		answer = nil
+		loop do	
+			answer = gets.chomp.downcase
+			break if answer == 'hit' || answer == 'stay'
+			prompt "Invalid input. Please type in hit or stay for your move."
+		end
+		clear_screen
+		if answer == 'hit'
+			hit(deck, player_hand)   
+			prompt "Your hand is #{player_hand}"
+			prompt "Total value of your hand is #{total(player_hand)}"
+		end
+		break if answer == 'stay' || busted?(player_hand)
   end
-end
 
-p total([['H', '2'], ['S', 'J'], ['D', 'A']])
-p total([['H', 'Q'], ['S', 'J'], ['D', 'A']])
-p total([['H', 'A'], ['S', 'J'], ['D', 'A']])
-p total([['H', '9'], ['S', 'J'], ['D', 'A'],['S','A']])
+  if busted?(player_hand)
+    display_result(dealer_hand, player_hand)
+    play_again? ? next : break
+  end
+
+  #Dealer Turn
+	prompt ("Dealers turn")
+	puts "=========================="
+  loop do
+		prompt "Dealer hand is #{dealer_hand}"
+		prompt "Total value of dealer's hand is #{total(dealer_hand)}. Your hand is worth #{total(player_hand)}"
+		result = detect_result(dealer_hand, player_hand)
+		break if result == :dealer || result == :dealer_busted || result == :tie
+		hit(deck, dealer_hand)
+		prompt "Dealer drawing card..."
+		sleep 4
+		clear_screen
+  end
+	display_result(dealer_hand, player_hand)
+	break unless play_again?
+	clear_screen
+end
+prompt "Thanks for playing!"
