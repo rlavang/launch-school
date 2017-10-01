@@ -13,46 +13,84 @@ deck = [['S', '1'], ['H', '1'], ['C', '1'],['D', '1'],
         ['S', 'K'], ['H', 'K'], ['C', 'K'],['D', 'K'],
         ['S', 'A'], ['H', 'A'], ['C', 'A'],['D', 'A']]
 
+def initalize_hand(deck)
+  hand = deck.sample(2)
+  deck.delete(hand[0])
+  deck.delete(hand[1])
+  hand
+end
+
+def hit(deck, hand)
+  hand << deck.sample
+end
+
 def total(cards)
+  card_values = cards.map{ |card| card[1] }
+
   total_value = 0
-  value = 0
-  cards.each do |card|
-    value = card[1]
+  card_values.each do |value|
     case value
     when 'J', 'Q', 'K'
-      value = 10
+      total_value += 10
     when 'A'
-      value = 11
+      total_value += 11
     else
-      value = card[1].to_i
+      total_value += value.to_i
     end
-    total_value += value
   end
 
 #Select only aces to adjust for highest value
-  cards = cards.select do |card|
-    card[1] == 'A'
+  card_values.select {|value| value == 'A'}.count.times do
+    total_value -=10 if total_value > 21
   end
 
-  cards.each do |card|
-    if total_value > 21
-      total_value -= 10
-    end
-  end
   total_value
 end
 
+def busted?(hand)
+  if total(hand) > 21
+    return true
+  end
+  false
+end
+
+#Intialize Game
+player_hand = initalize_hand(deck)
+puts "Your hand is #{player_hand}"
+
+#Players Turn
 loop do
   puts "Hit or stay?"
   answer = gets.chomp
-  break if answer == 'stay' || busted?
-
+  hit(deck, player_hand)   
+  puts "Your hand is #{player_hand}"
+  puts "Total value of your hand is #{total(player_hand)}"
+  break if answer == 'stay' || busted?(player_hand)
 end
 
-if busted?
-  #end tje gam,e
+if busted?(player_hand)
+  puts "You lost. Try your luck another time."
+  #end the game
 else
   puts "You chose to stay"
+end
+
+#Dealer Turn
+dealer_hand = initalize_hand(deck)
+puts "Dealer hand is #{dealer_hand}"
+puts "Total value of hand is #{total(dealer_hand)}"
+loop do
+  if busted?(dealer_hand)
+     puts "Dealer busted. You win!"
+     break
+  elsif  total(dealer_hand) > total(player_hand) 
+    puts "Dealer wins!"
+    break
+  else
+    hit(deck, dealer_hand)
+    puts "Dealer hand is #{dealer_hand}"
+    puts "Dealer hand value is #{total(dealer_hand)}"
+  end
 end
 
 p total([['H', '2'], ['S', 'J'], ['D', 'A']])
