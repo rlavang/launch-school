@@ -1,17 +1,9 @@
-deck = [['S', '1'], ['H', '1'], ['C', '1'], ['D', '1'],
-        ['S', '2'], ['H', '2'], ['C', '2'], ['D', '2'],
-        ['S', '3'], ['H', '3'], ['C', '3'], ['D', '3'],
-        ['S', '4'], ['H', '4'], ['C', '4'], ['D', '4'],
-        ['S', '5'], ['H', '5'], ['C', '5'], ['D', '5'],
-        ['S', '6'], ['H', '6'], ['C', '6'], ['D', '6'],
-        ['S', '7'], ['H', '7'], ['C', '7'], ['D', '7'],
-        ['S', '8'], ['H', '8'], ['C', '8'], ['D', '8'],
-        ['S', '9'], ['H', '9'], ['C', '9'], ['D', '9'],
-        ['S', '10'], ['H', '10'], ['C', '10'], ['D', '10'],
-        ['S', 'J'], ['H', 'J'], ['C', 'J'], ['D', 'J'],
-        ['S', 'Q'], ['H', 'Q'], ['C', 'Q'], ['D', 'Q'],
-        ['S', 'K'], ['H', 'K'], ['C', 'K'], ['D', 'K'],
-        ['S', 'A'], ['H', 'A'], ['C', 'A'], ['D', 'A']]
+SUITS = ['H', 'D', 'S', 'C']
+VALUES = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+def initialize_deck
+  SUITS.product(VALUES).shuffle
+end
 
 def clear_screen
   (system "clear") || (system 'cls')
@@ -22,20 +14,18 @@ def prompt(msg)
 end
 
 def initalize_hand(deck)
-  hand = deck.sample(2)
-  deck.delete(hand[0])
-  deck.delete(hand[1])
+  hand = []
+  2.times do
+    hand << deck.pop
+  end
   hand
 end
 
 def hit(deck, hand)
-  hand << deck.sample
+  hand << deck.pop
 end
 
-def detect_result(dealer_hand, player_hand)
-  player_total = total(player_hand)
-  dealer_total = total(dealer_hand)
-
+def detect_result(player_total, dealer_total)
   if player_total > 21
     :player_busted
   elsif dealer_total > 21
@@ -49,8 +39,8 @@ def detect_result(dealer_hand, player_hand)
   end
 end
 
-def display_result(dealer_hand, player_hand)
-  result = detect_result(dealer_hand, player_hand)
+def display_result(player_total, dealer_total)
+  result = detect_result(player_total, dealer_total)
 
   case result
   when :player_busted
@@ -86,8 +76,8 @@ def total(cards)
   total_value
 end
 
-def busted?(hand)
-  return true if total(hand) > 21
+def busted?(hand, total)
+  return true if total > 21
   false
 end
 
@@ -112,10 +102,13 @@ loop do
   prompt "Welcome to Twenty-One!"
   prompt "Dealing player hand..."
 
+  deck = initialize_deck
   player_hand = initalize_hand(deck)
   dealer_hand = initalize_hand(deck)
+  player_total = total(player_hand)
+  dealer_total = total(dealer_hand)
   prompt "Your hand is #{player_hand}"
-  prompt "Total value of your hand is #{total(player_hand)}"
+  prompt "Total value of your hand is #{player_total}"
 
   # Players Turn
   loop do
@@ -129,14 +122,15 @@ loop do
     clear_screen
     if answer == 'hit'
       hit(deck, player_hand)
+      player_total = total(player_hand)
       prompt "Your hand is #{player_hand}"
-      prompt "Total value of your hand is #{total(player_hand)}"
+      prompt "Total value of your hand is #{player_total}"
     end
-    break if answer == 'stay' || busted?(player_hand)
+    break if answer == 'stay' || busted?(player_hand, player_total)
   end
 
-  if busted?(player_hand)
-    display_result(dealer_hand, player_hand)
+  if busted?(player_hand, player_total)
+    display_result(player_total, dealer_total)
     play_again? ? next : break
   end
 
@@ -145,16 +139,17 @@ loop do
   puts "=========================="
   loop do
     prompt "Dealer hand is #{dealer_hand}"
-    prompt "Value of dealer's hand is #{total(dealer_hand)}."
-    prompt "Your hand is worth #{total(player_hand)}"
-    result = detect_result(dealer_hand, player_hand)
+    prompt "Value of dealer's hand is #{dealer_total}."
+    prompt "Your hand is worth #{player_total}"
+    result = detect_result(player_total, dealer_total)
     break if result == :dealer || result == :dealer_busted || result == :tie
     hit(deck, dealer_hand)
+    dealer_total = total(dealer_hand)
     prompt "Dealer drawing card..."
     sleep 4
     clear_screen
   end
-  display_result(dealer_hand, player_hand)
+  display_result(player_total, dealer_total)
   break unless play_again?
   clear_screen
 end
