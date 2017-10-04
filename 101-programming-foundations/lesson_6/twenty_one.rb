@@ -77,7 +77,7 @@ def total(cards)
   total_value
 end
 
-def busted?(hand, total)
+def busted?(total)
   return true if total > MAX_SCORE
   false
 end
@@ -106,11 +106,11 @@ end
 
 def increment_score(score, player_total, dealer_total)
   winner = detect_winner(player_total, dealer_total)
-  score[winner] += 1 if winner 
+  score[winner] += 1 if winner
 end
 
 def game_over?(score)
-  return true if score[:player] >=5 || score[:dealer] >=5
+  return true if score[:player] >= 5 || score[:dealer] >= 5
   false
 end
 
@@ -128,7 +128,7 @@ loop do
   prompt "Welcome to #{MAX_SCORE}!"
   prompt "First to win 5 rounds, wins the game!"
   prompt "Starting match..."
-  score = {:player => 0, :dealer => 0}
+  score = { player: 0, dealer: 0 }
   sleep 2
 
   loop do
@@ -159,18 +159,20 @@ loop do
         prompt "Your hand is #{player_hand}"
         prompt "Total value of your hand is #{player_total}"
       end
-      break if answer == 'stay' || busted?(player_hand, player_total)
+      break if answer == 'stay' || busted?(player_total)
     end
 
-    if busted?(player_hand, player_total)
+    if busted?(player_total)
       display_result(player_total, dealer_total)
       increment_score(score, player_total, dealer_total)
-      game_over?(score) ? break : next
+      game_over?(score) ? break : (sleep 2)
+      prompt "Starting new round..."
+      next
     end
 
     # Dealer Turn
-    prompt "Dealers turn"
     puts "=========================="
+    prompt "Dealers turn"
     loop do
       prompt "Dealer hand is #{dealer_hand}"
       prompt "Value of dealer's hand is #{dealer_total}."
