@@ -78,8 +78,7 @@ def total(cards)
 end
 
 def busted?(total)
-  return true if total > MAX_SCORE
-  false
+  total > MAX_SCORE
 end
 
 def play_again?
@@ -110,8 +109,7 @@ def increment_score(score, player_total, dealer_total)
 end
 
 def game_over?(score)
-  return true if score[:player] >= 5 || score[:dealer] >= 5
-  false
+  score[:player] >= 5 || score[:dealer] >= 5
 end
 
 def final_result(score)
@@ -120,6 +118,17 @@ def final_result(score)
   elsif score[:dealer] >= 5
     prompt "Dealer has won the game!"
   end
+end
+
+def decide_move
+  answer = nil
+  loop do
+    prompt "Hit or stay?"
+    answer = gets.chomp.downcase
+    break if answer == 'hit' || answer == 'stay'
+    prompt "Invalid input. Please type in hit or stay for your move."
+  end
+  answer
 end
 
 # Intialize Game
@@ -145,21 +154,15 @@ loop do
 
     # Players Turn
     loop do
-      prompt "Hit or stay?"
-      answer = nil
-      loop do
-        answer = gets.chomp.downcase
-        break if answer == 'hit' || answer == 'stay'
-        prompt "Invalid input. Please type in hit or stay for your move."
-      end
+      move = decide_move
       clear_screen
-      if answer == 'hit'
+      if move == 'hit'
         hit(deck, player_hand)
         player_total = total(player_hand)
         prompt "Your hand is #{player_hand}"
         prompt "Total value of your hand is #{player_total}"
       end
-      break if answer == 'stay' || busted?(player_total)
+      break if move == 'stay' || busted?(player_total)
     end
 
     if busted?(player_total)
@@ -182,7 +185,7 @@ loop do
       hit(deck, dealer_hand)
       dealer_total = total(dealer_hand)
       prompt "Dealer drawing card..."
-      sleep 4
+      sleep 5
       clear_screen
     end
     display_result(player_total, dealer_total)
