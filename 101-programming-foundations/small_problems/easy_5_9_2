@@ -1,0 +1,9 @@
+def crunch(string)
+  string.chars.select.with_index {|char, i| char != string[i + 1]}.join
+end
+
+p crunch('ddaaiillyy ddoouubbllee') == 'daily double'
+p crunch('4444abcabccba') == '4abcabcba'
+p crunch('ggggggggggggggg') == 'g'
+p crunch('a') == 'a'
+p crunch('') == ''
